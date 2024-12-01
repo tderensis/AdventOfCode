@@ -1,1 +1,1 @@
-My solutions to the Advent of Code puzzels: https://adventofcode.com
+My solutions to the Advent of Code puzzles: https://adventofcode.com
