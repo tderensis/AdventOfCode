@@ -6,35 +6,15 @@
 #include <string_view>
 #include <algorithm>
 
-int main(int argc, char* argv[])
+
+std::tuple<std::vector<int>, std::vector<int>> parse_input(std::istream& input)
 {
-	std::print("Day1 Solution\n");
-
-	std::string filename;
-
-	if (argc < 2)
-	{
-		filename = "input.txt";
-	}
-	else
-	{
-		filename = argv[1];
-	}
-	
-	std::ifstream inputFile(filename);
-
-	if (!inputFile.is_open())
-	{
-		std::print("Couldn't open {}\n", filename);
-		return -1;
-	}
-
 	std::vector<int> list1;
 	std::vector<int> list2;
 
 	std::string line;
 	
-	while  (std::getline(inputFile, line))
+	while  (std::getline(input, line))
 	{
 		int n1 = 0;
 		int n2 = 0;
@@ -42,12 +22,28 @@ int main(int argc, char* argv[])
 		if (numValues != 2)
 		{
 			std::print("Could not convert to int\n");
-			return -1;
+			continue;
 		}
 		
 		list1.push_back(n1);
 		list2.push_back(n2);
 	}
+
+	return { list1, list2 };
+}
+
+int main(int argc, char* argv[])
+{
+	std::string   filename = argc < 2 ? "input.txt" : argv[1];
+    std::ifstream inputFile(filename);
+
+	if (!inputFile.is_open())
+	{
+		std::print("Couldn't open {}\n", filename);
+		return -1;
+	}
+
+	auto [list1, list2] = parse_input(inputFile);
 
 	std::sort(list1.begin(), list1.end());
 	std::sort(list2.begin(), list2.end());
@@ -71,8 +67,8 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	std::print("List Diff: {}\n", diff);
-	std::print("Similarity Score: {}\n", similarity);
+	std::print("Part 1: {}\n", diff);
+	std::print("Part 2: {}\n", similarity);
 													 
     return 0;
 }
