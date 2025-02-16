@@ -3,5 +3,5 @@
 mkdir -p build
 cd build/
 cmake ..
-cmake --build . || exit 1
+cmake --build . --clean-first || exit 1
 cd ../

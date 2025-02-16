@@ -70,7 +70,6 @@ int main(int argc, char* argv[])
 		}
 		numbers.push_back(number);
 
-		int combinations = 1 << (numbers.size() - 1);
 	    std::vector<int> ops(numbers.size() - 1, 2);
 	    while (true)
 		{
@@ -88,7 +87,7 @@ int main(int argc, char* argv[])
 			}
 
 			int64_t test_result = numbers[0];
-			for (int j = 0; j < ops.size(); ++j)
+			for (size_t j = 0; j < ops.size(); ++j)
 			{
 				if (ops[j] == 0)
 				{

@@ -64,8 +64,6 @@ int main(int argc, char* argv[])
 	}
 
 	std::string line;
-	int numSafe = 0;
-	int numSafeOneRemoved = 0;
 	int doCount = 0;
 	int dontCount = 0;
 	bool mulEnabled = true;

@@ -17,8 +17,8 @@ enum class Direction
 
 struct Position
 {
-	int x;
-	int y;
+	size_t x;
+	size_t y;
 };
 
 static constexpr char VISITED = 'X';
@@ -64,9 +64,9 @@ Position next_position(Position p, Direction d)
 	}
 }
 
-bool is_position_in_bounds(Position p, int rows, int cols)
+bool is_position_in_bounds(Position p, size_t rows, size_t cols)
 {
-	return (p.y >= 0 && p.y < rows && p.x >= 0 && p.x < cols);
+	return (p.y < rows && p.x < cols);
 }
 
 int main(int argc, char* argv[])
@@ -151,9 +151,9 @@ int main(int argc, char* argv[])
 
 	int loop_count = 0;
 
-	for (int row = 0; row < maze.size(); ++row)
+	for (size_t row = 0; row < maze.size(); ++row)
 	{
-		for (int col = 0; col < maze[0].size(); ++col)
+		for (size_t col = 0; col < maze[0].size(); ++col)
 		{
 			dir = start_dir;
 			pos = start_pos;

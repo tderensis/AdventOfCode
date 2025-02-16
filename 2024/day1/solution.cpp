@@ -4,6 +4,7 @@
 #include <vector>
 #include <stdio.h>
 #include <string_view>
+#include <algorithm>
 
 int main(int argc, char* argv[])
 {
