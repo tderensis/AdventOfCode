@@ -5,6 +5,7 @@
 #include <vector>
 #include <stdio.h>
 #include <string_view>
+#include <ranges>
 
 enum class Direction
 {
@@ -21,6 +22,8 @@ struct Position
     size_t y;
 };
 
+using Maze = std::vector<std::vector<char>>;
+
 static constexpr char VISITED  = 'X';
 static constexpr char OBSTACLE = '#';
 
@@ -34,6 +37,33 @@ Direction char_to_direction(char c)
     case '<': return Direction::left;
     default:  return Direction::count;
     }
+}
+
+std::tuple<Maze, Position, Direction> parse_input(std::istream& input)
+{
+
+    Maze      maze;
+    Direction dir;
+    Position  pos{0, 0};
+
+    for (std::string line; std::getline(input, line);)
+    {
+        std::vector<char> maze_row;
+        for (char c : line)
+        {
+            Direction d = char_to_direction(c);
+            if (d != Direction::count)
+            {
+                dir   = d;
+                pos.x = maze_row.size();
+                pos.y = maze.size();
+            }
+            maze_row.push_back(c);
+        }
+        maze.push_back(maze_row);
+    }
+
+    return {maze, pos, dir};
 }
 
 Direction next_direction(Direction d)
@@ -71,19 +101,7 @@ bool is_position_in_bounds(Position p, size_t rows, size_t cols)
 
 int main(int argc, char* argv[])
 {
-    std::print("Day 6 Solution\n");
-
-    std::string filename;
-
-    if (argc < 2)
-    {
-        filename = "input.txt";
-    }
-    else
-    {
-        filename = argv[1];
-    }
-
+    std::string   filename = argc < 2 ? "input.txt" : argv[1];
     std::ifstream inputFile(filename);
 
     if (!inputFile.is_open())
@@ -92,35 +110,12 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    // Read the maze into a vector
-    // Record the initial position and direction
-    std::vector<std::vector<char>> maze;
-    std::string                    line;
-    Direction                      dir;
-    Position                       pos{0, 0};
+    auto [maze, pos, dir] = parse_input(inputFile);
 
-    while (std::getline(inputFile, line))
-    {
-        std::vector<char> maze_row;
-        for (char c : line)
-        {
-            Direction d = char_to_direction(c);
-            if (d != Direction::count)
-            {
-                dir   = d;
-                pos.x = maze_row.size();
-                pos.y = maze.size();
-            }
-            maze_row.push_back(c);
-        }
-        maze.push_back(maze_row);
-    }
-
-    // Starting position is visited
     Position  start_pos = pos;
     Direction start_dir = dir;
 
-    maze[pos.y][pos.x] = VISITED;
+    maze[pos.y][pos.x] = VISITED; // Starting position is visited
     int visited        = 1;
 
     std::vector<std::vector<char>> start_maze = maze;
@@ -153,7 +148,8 @@ int main(int argc, char* argv[])
 
     for (size_t row = 0; row < maze.size(); ++row)
     {
-        for (size_t col = 0; col < maze[0].size(); ++col)
+        for (const auto& [row_idx, col] :
+             std::views::enumerate(std::views::iota(0uz, maze[0].size())))
         {
             dir  = start_dir;
             pos  = start_pos;
@@ -205,7 +201,8 @@ int main(int argc, char* argv[])
         }
     }
 
-    std::print("Visited {}\n", visited);
-    std::print("Loop Count {}\n", loop_count);
+    std::print("Part 1: {}\n", visited);
+    std::print("Part 2: {}\n", loop_count);
+
     return 0;
 }
