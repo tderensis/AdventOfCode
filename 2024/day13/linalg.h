@@ -293,8 +293,8 @@ namespace linalg
         template<class U> 
         constexpr explicit          mat(const mat<U,M,1> & m)           : mat(V(m.x)) {}
         constexpr vec<T,1>          row(int i) const                    { return {x[i]}; }
-        constexpr const V &         operator[] (int j) const            { return x; }
-        LINALG_CONSTEXPR14 V &      operator[] (int j)                  { return x; }
+        constexpr const V &         operator[] (int) const              { return x; }
+        LINALG_CONSTEXPR14 V &      operator[] (int)                    { return x; }
 
         template<class U, class=detail::conv_t<mat,U>> constexpr mat(const U & u) : mat(converter<mat,U>{}(u)) {}
         template<class U, class=detail::conv_t<U,mat>> constexpr operator U () const { return converter<U,mat>{}(*this); }

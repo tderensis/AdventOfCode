@@ -28,15 +28,15 @@ ClawGames parse_input(std::istream& input)
     {
         if (line_number % 4 == 0)
         {
-            sscanf(line.data(), "Button A: X+%lld, Y+%lld", &game.x_a, &game.y_a);
+            sscanf(line.data(), "Button A: X+%ld, Y+%ld", &game.x_a, &game.y_a);
         }
         else if (line_number % 4 == 1)
         {
-            sscanf(line.data(), "Button B: X+%lld, Y+%lld", &game.x_b, &game.y_b);
+            sscanf(line.data(), "Button B: X+%ld, Y+%ld", &game.x_b, &game.y_b);
         }
         else if (line_number % 4 == 2)
         {
-            sscanf(line.data(), "Prize: X=%lld, Y=%lld", &game.x_p, &game.y_p);
+            sscanf(line.data(), "Prize: X=%ld, Y=%ld", &game.x_p, &game.y_p);
         }
         else if (line_number % 4 == 3)
         {
@@ -89,8 +89,6 @@ int64_t solve_game(const ClawGame& game)
 
 int main(int argc, char* argv[])
 {
-    std::print("Day 13 Solution\n");
-
     std::string   filename = argc < 2 ? "input.txt" : argv[1];
     std::ifstream inputFile(filename);
 
@@ -113,7 +111,7 @@ int main(int argc, char* argv[])
         tokens_p2 += solve_game(game);
     }
 
-    std::print("Total tokens p1 {}\n", tokens_p1);
-    std::print("Total tokens p2 {}\n", tokens_p2);
+    std::print("Part 1: {}\n", tokens_p1);
+    std::print("Part 2: {}\n", tokens_p2);
     return 0;
 }
