@@ -1,26 +1,64 @@
 #include <print>
 #include <fstream>
-#include <sstream>
 #include <string>
 #include <vector>
-#include <stdio.h>
-#include <string_view>
+
+struct Equation
+{
+    int64_t              result;
+    std::vector<int64_t> numbers;
+};
+
+std::vector<Equation> parse_input(std::istream& input)
+{
+    std::vector<Equation> equations;
+
+    for (std::string line; std::getline(input, line);)
+    {
+        Equation equation = {};
+        size_t   i;
+
+        for (i = 0; i < line.size(); ++i)
+        {
+            char c = line[i];
+            if (c == ':')
+            {
+                break;
+            }
+            equation.result = equation.result * 10 + (c - '0');
+        }
+
+        int64_t number = 0;
+
+        for (i = i + 2; i < line.size(); ++i)
+        {
+            char c = line[i];
+            if (c == ' ')
+            {
+                equation.numbers.push_back(number);
+                number = 0;
+                continue;
+            }
+            number = number * 10 + (c - '0');
+        }
+        equation.numbers.push_back(number);
+        equations.push_back(equation);
+    }
+
+    return equations;
+}
+
+enum class Operation
+{
+    add,
+    multiply,
+    concatenate,
+    count,
+};
 
 int main(int argc, char* argv[])
 {
-    std::print("Day 7 Solution\n");
-
-    std::string filename;
-
-    if (argc < 2)
-    {
-        filename = "input.txt";
-    }
-    else
-    {
-        filename = argv[1];
-    }
-
+    std::string   filename = argc < 2 ? "input.txt" : argv[1];
     std::ifstream inputFile(filename);
 
     if (!inputFile.is_open())
@@ -29,102 +67,90 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    // Read the maze into a vector
-    // Record the initial position and direction
-    std::string line;
-    int64_t     total = 0;
+    auto equations = parse_input(inputFile);
 
-    while (std::getline(inputFile, line))
+    int64_t total_without_concat = 0;
+    int64_t total_with_concat    = 0;
+
+    for (const auto& equation : equations)
     {
-        std::vector<int64_t> numbers;
-        int64_t              number = 0;
-        int                  index  = 0;
-        for (size_t i = 0; i < line.size(); ++i)
+        std::vector<Operation> ops(equation.numbers.size() - 1, Operation::add);
+
+        size_t total_permutations = 1;
+        for (size_t i = 0; i < ops.size(); ++i)
         {
-            char c = line[i];
-            if (c == ':')
-            {
-                index = i;
-                break;
-            }
-            number = number * 10 + (c - '0');
+            total_permutations *= static_cast<size_t>(Operation::count);
         }
 
-        int64_t result = number;
-        number         = 0;
+        bool without_concat_done = false;
+        bool with_concat_done    = false;
 
-        ++index; // skip space
-        ++index;
-
-        for (size_t i = index; i < line.size(); ++i)
+        for (size_t i = 0; i < total_permutations; ++i)
         {
-            char c = line[i];
-            if (c == ' ')
-            {
-                numbers.push_back(number);
-                number = 0;
-                continue;
-            }
-            number = number * 10 + (c - '0');
-        }
-        numbers.push_back(number);
+            int64_t result_without_concat = equation.numbers[0];
+            int64_t result_with_concat    = equation.numbers[0];
+            bool    is_concat             = false;
 
-        std::vector<int> ops(numbers.size() - 1, 2);
-        while (true)
-        {
-            for (int& op : ops)
-            {
-                if (op == 2)
-                {
-                    op = 0;
-                }
-                else
-                {
-                    ++op;
-                    break;
-                }
-            }
-
-            int64_t test_result = numbers[0];
             for (size_t j = 0; j < ops.size(); ++j)
             {
-                if (ops[j] == 0)
+                int64_t n = equation.numbers[j + 1];
+                if (ops[j] == Operation::add)
                 {
-                    test_result = test_result + numbers[j + 1];
+                    result_without_concat += n;
+                    result_with_concat += n;
                 }
-                else if (ops[j] == 1)
+                else if (ops[j] == Operation::multiply)
                 {
-                    test_result = test_result * numbers[j + 1];
+                    result_without_concat *= n;
+                    result_with_concat *= n;
                 }
                 else
                 {
+                    is_concat   = true;
                     int64_t mag = 10;
-                    int64_t x   = numbers[j + 1];
+                    int64_t x   = n;
                     while (x /= 10)
+                    {
                         mag *= 10;
-                    test_result = test_result * mag + numbers[j + 1];
+                    }
+                    result_with_concat = result_with_concat * mag + n;
                 }
             }
-            if (result == test_result)
+
+            if (!without_concat_done && equation.result == result_without_concat && !is_concat)
             {
-                total += result;
+                total_without_concat += equation.result;
+                without_concat_done = true;
+            }
+            if (!with_concat_done && equation.result == result_with_concat)
+            {
+                total_with_concat += equation.result;
+                with_concat_done = true;
+            }
+
+            if (without_concat_done && with_concat_done)
+            {
                 break;
             }
-            bool cont = false;
-            for (int op : ops)
+
+            // Do the next permutation of operations
+            for (Operation& op : ops)
             {
-                if (op != 2)
+                op = static_cast<Operation>(static_cast<int>(op) + 1);
+                if (op == Operation::count)
                 {
-                    cont = true;
+                    op = Operation::add;
+                }
+                else
+                {
                     break;
                 }
             }
-            if (!cont)
-                break;
         }
     }
 
-    std::print("Total calibration result {}\n", total);
+    std::print("Part 1: {}\n", total_without_concat);
+    std::print("Part 2: {}\n", total_with_concat);
 
     return 0;
 }
