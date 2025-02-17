@@ -30,8 +30,8 @@ struct Region
 
 struct Position
 {
-    int x;
-    int y;
+    size_t x;
+    size_t y;
 };
 
 Map parse_map(std::istream& input)
@@ -73,7 +73,7 @@ Position right(Position p)
 
 bool in_bounds(const Map& map, Position p)
 {
-    return (p.y >= 0 && p.y < map.size() && p.x >= 0 && p.x < map[0].size());
+    return (p.y < map.size() && p.x < map[0].size());
 }
 
 int calculate_perimeter(const Map& map, Position p)
@@ -96,9 +96,9 @@ int calculate_perimeter(const Map& map, Position p)
 
 void print_map(const Map& map)
 {
-    for (int y = 0; y < map.size(); ++y)
+    for (size_t y = 0; y < map.size(); ++y)
     {
-        for (int x = 0; x < map[y].size(); ++x)
+        for (size_t x = 0; x < map[y].size(); ++x)
         {
             std::print("{}:{} ", map[y][x].plant, map[y][x].visited ? 1 : 0);
         }
@@ -169,8 +169,6 @@ Region walk_region(Map& map, Position p)
 
 int main(int argc, char* argv[])
 {
-    std::print("Day 12 Solution\n");
-
     std::string   filename = argc < 2 ? "input.txt" : argv[1];
     std::ifstream inputFile(filename);
 
@@ -184,15 +182,14 @@ int main(int argc, char* argv[])
 
     std::vector<Region> regions;
 
-    for (int y = 0; y < map.size(); ++y)
+    for (size_t y = 0; y < map.size(); ++y)
     {
-        for (int x = 0; x < map[y].size(); ++x)
+        for (size_t x = 0; x < map[y].size(); ++x)
         {
             if (!map[y][x].visited)
             {
                 auto region = walk_region(map, {x, y});
                 regions.push_back(region);
-                // print_map(map);
             }
         }
     }
@@ -205,7 +202,8 @@ int main(int argc, char* argv[])
         total_price_bulk += region.area * region.corners; // sides = corners
     }
 
-    std::print("Total price: {}\n", total_price);
-    std::print("Total price bulk: {}\n", total_price_bulk);
+    std::print("Part 1: {}\n", total_price);
+    std::print("Part 2: {}\n", total_price_bulk);
+
     return 0;
 }
