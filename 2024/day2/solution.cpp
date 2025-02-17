@@ -1,109 +1,113 @@
 #include <print>
 #include <fstream>
+#include <istream>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <stdio.h>
-#include <string_view>
+#include <algorithm>
 
-bool levelIsSafe(std::vector<int> level)
+using Level = std::vector<int>;
+
+std::vector<Level> parse_input(std::istream& input)
 {
-	int first = level[0];
-	int second = level[1];
-	int difference = abs(first - second);
+    std::vector<Level> levels;
+    std::string        line;
 
-	if (difference < 1 || difference > 3)
-	{
-		return false;
-	}
+    while (std::getline(input, line))
+    {
+        std::stringstream stream(line);
 
-	bool previousAscending = second > first;
-	int previous = second;
-	for (std::size_t i = 2; i < level.size(); ++i)
-	{
-		int current = level[i];
-		bool currentAscending = current > previous;
+        Level level;
+        while (!stream.eof())
+        {
+            int         number;
+            std::string s;
+            stream >> s;
+            if (std::stringstream(s) >> number)
+            {
+                level.push_back(number);
+            }
+        }
 
-		if (previousAscending != currentAscending)
-		{
-		    return false;
-		}
-		int difference = abs(current - previous);
-		if (difference < 1 || difference > 3)
-		{
-			return false;
-		}
-		previousAscending = currentAscending;
-		previous = current;
-	}
-	return true;
+        levels.push_back(level);
+    }
+
+    return levels;
+}
+
+bool levelIsSafe(const Level& level)
+{
+    int first      = level[0];
+    int second     = level[1];
+    int difference = abs(first - second);
+
+    if (difference < 1 || difference > 3)
+    {
+        return false;
+    }
+
+    bool previousAscending = second > first;
+    int  previous          = second;
+    for (std::size_t i = 2; i < level.size(); ++i)
+    {
+        int  current          = level[i];
+        bool currentAscending = current > previous;
+
+        if (previousAscending != currentAscending)
+        {
+            return false;
+        }
+        int difference = abs(current - previous);
+        if (difference < 1 || difference > 3)
+        {
+            return false;
+        }
+        previousAscending = currentAscending;
+        previous          = current;
+    }
+    return true;
 }
 
 int main(int argc, char* argv[])
 {
-	std::print("Day2 Solution\n");
+    std::string   filename = argc < 2 ? "input.txt" : argv[1];
+    std::ifstream inputFile(filename);
 
-	std::string filename;
+    if (!inputFile.is_open())
+    {
+        std::print("Couldn't open {}\n", filename);
+        return -1;
+    }
 
-	if (argc < 2)
-	{
-		filename = "input.txt";
-	}
-	else
-	{
-		filename = argv[1];
-	}
-	
-	std::ifstream inputFile(filename);
+    auto levels = parse_input(inputFile);
 
-	if (!inputFile.is_open())
-	{
-		std::print("Couldn't open {}\n", filename);
-		return -1;
-	}
+    int numSafe           = 0;
+    int numSafeOneRemoved = 0;
 
-	std::string line;
-	int numSafe = 0;
-	int numSafeOneRemoved = 0;
-	
-	while  (std::getline(inputFile, line))
-	{
-		std::stringstream stream(line);
+    for (const auto& level : levels)
+    {
+        if (levelIsSafe(level))
+        {
+            ++numSafe;
+            ++numSafeOneRemoved;
+        }
+        else
+        {
+            for (std::size_t i = 0; i < level.size(); ++i)
+            {
+                Level levelOneRemoved = level;
+                levelOneRemoved.erase(levelOneRemoved.begin() + i);
+                if (levelIsSafe(levelOneRemoved))
+                {
+                    ++numSafeOneRemoved;
+                    break;
+                }
+            }
+        }
+    }
 
-		std::vector<int> numberList;
-		while (!stream.eof())
-		{
-			int number;
-			std::string s;
-			stream >> s;
-			if (std::stringstream(s) >> number)
-			{
-				numberList.push_back(number);
-			}
-		}
+    std::print("Part 1: {}\n", numSafe);
+    std::print("Part 2: {}\n", numSafeOneRemoved);
 
-		if (levelIsSafe(numberList))
-		{
-			++numSafe;
-			++numSafeOneRemoved;
-		}
-		else
-		{
-			for (std::size_t i = 0; i < numberList.size(); ++i)
-			{
-				std::vector<int> levelListOneRemoved = numberList;
-				levelListOneRemoved.erase(levelListOneRemoved.begin() + i);
-				if (levelIsSafe(levelListOneRemoved))
-				{
-					++numSafeOneRemoved;
-					break;
-				}
-			}
-		}
-	}
-
-	std::print("Num Safe Reports: {}\n", numSafe);
-	std::print("Num Safe Reports One Removed: {}\n", numSafeOneRemoved);
-													 
     return 0;
 }

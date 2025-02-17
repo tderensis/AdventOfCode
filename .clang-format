@@ -1,0 +1,23 @@
+# see https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+---
+BasedOnStyle: Microsoft
+Language: Cpp
+Standard: Latest
+
+ColumnLimit: 100
+
+AccessModifierOffset: -4
+IndentWidth: 4
+UseTab: Never
+
+AlignAfterOpenBracket: AlwaysBreak
+AlignArrayOfStructures: Left
+AlignConsecutiveAssignments: Consecutive
+AlignConsecutiveBitFields: Consecutive
+AlignConsecutiveDeclarations: Consecutive
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+AlignEscapedNewlines: LeftWithLastLine
+AllowShortCaseLabelsOnASingleLine: true
+PointerAlignment: Left
+SortIncludes: Never
