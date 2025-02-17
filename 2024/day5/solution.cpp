@@ -13,11 +13,11 @@ struct Rule
 };
 
 using Numbers = std::vector<int>;
-using Rules  = std::vector<Rule>;
+using Rules   = std::vector<Rule>;
 
 std::tuple<Rules, std::vector<Numbers>> parse_input(std::istream& input)
 {
-    Rules  rules;
+    Rules                rules;
     std::vector<Numbers> numberList;
 
     for (std::string line; std::getline(input, line) && line.length() != 0;)
@@ -33,7 +33,7 @@ std::tuple<Rules, std::vector<Numbers>> parse_input(std::istream& input)
     for (std::string line; std::getline(input, line);)
     {
         Numbers numbers;
-        int              number = 0;
+        int     number = 0;
         for (char c : line)
         {
             if (c == ',')
@@ -131,6 +131,6 @@ int main(int argc, char* argv[])
 
     std::print("Part 1: {}\n", midCount);
     std::print("Part 2: {}\n", fixedMidCount);
-    
+
     return 0;
 }
