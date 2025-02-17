@@ -64,10 +64,13 @@ void print_game(const ClawGame& game)
  */
 int64_t solve_game(const ClawGame& game)
 {
-    linalg::aliases::double2x2 X {
-        { (double) game.x_a, (double) game.y_a},
-        { (double) game.x_b, (double) game.y_b}};
-    linalg::aliases::double2x1 Y {{ (double) game.x_p, (double) game.y_p }};
+    linalg::aliases::double2x2 X{
+        {(double)game.x_a, (double)game.y_a},
+        {(double)game.x_b, (double)game.y_b}
+    };
+    linalg::aliases::double2x1 Y{
+        {(double)game.x_p, (double)game.y_p}
+    };
 
     auto S = mul(inverse(X), Y);
 
@@ -76,8 +79,8 @@ int64_t solve_game(const ClawGame& game)
     auto a_presses = lround(S[0][0]);
     auto b_presses = lround(S[0][1]);
 
-    if (game.x_p == a_presses*game.x_a + b_presses*game.x_b &&
-        game.y_p == a_presses*game.y_a + b_presses*game.y_b)
+    if (game.x_p == a_presses * game.x_a + b_presses * game.x_b &&
+        game.y_p == a_presses * game.y_a + b_presses * game.y_b)
     {
         return a_presses * 3 + b_presses; // A button costs 3 tokens
     }

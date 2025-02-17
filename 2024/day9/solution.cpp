@@ -7,7 +7,7 @@
 #include <string_view>
 struct DiskPartition
 {
-	int index;
+    int index;
     int used;
     int free;
 };
@@ -16,8 +16,8 @@ std::vector<DiskPartition> parseDisk(std::string s)
 {
     std::vector<DiskPartition> disk;
 
-    bool parsingUsedSize = true;
-    DiskPartition partition = {};
+    bool          parsingUsedSize = true;
+    DiskPartition partition       = {};
     for (char c : s)
     {
         if (parsingUsedSize)
@@ -28,7 +28,7 @@ std::vector<DiskPartition> parseDisk(std::string s)
         {
             partition.free = c - '0';
             disk.push_back(partition);
-			partition.index++;
+            partition.index++;
         }
         parsingUsedSize = !parsingUsedSize;
     }
@@ -42,7 +42,7 @@ std::vector<DiskPartition> parseDisk(std::string s)
 std::vector<int> defrag(std::vector<DiskPartition> disk)
 {
     std::vector<int> defrag_disk;
-    bool done = false;
+    bool             done = false;
     for (int i = 0; i < disk.size() - 1; ++i)
     {
         int used = disk[i].used;
@@ -64,7 +64,7 @@ std::vector<int> defrag(std::vector<DiskPartition> disk)
                 else
                 {
                     disk.pop_back();
-                    if(i >= disk.size() - 1)
+                    if (i >= disk.size() - 1)
                     {
                         done = true;
                         break;
@@ -98,25 +98,25 @@ int64_t calculate_checksum(std::vector<int> defrag_disk)
 std::vector<int> defrag_whole(std::vector<DiskPartition> disk)
 {
     std::vector<int> defrag_disk = {};
-    bool done = false;
+    bool             done        = false;
     for (int i = disk.size() - 1; i >= 0; --i)
     {
-		int j = 0;
+        int j = 0;
         while (disk[j].index != disk[i].index)
-		{
-			if (disk[i].used <= disk[j].free)
-			{
-				disk[i-1].free += disk[i].free + disk[i].used;
-				disk[i].free = disk[j].free - disk[i].used;
-				disk[j].free = 0;
-				disk.insert(disk.begin() + j + 1, disk[i]);
-				disk.erase(disk.begin() + i + 1);
-				++i;
-				break;
-			}
-			++j;
+        {
+            if (disk[i].used <= disk[j].free)
+            {
+                disk[i - 1].free += disk[i].free + disk[i].used;
+                disk[i].free = disk[j].free - disk[i].used;
+                disk[j].free = 0;
+                disk.insert(disk.begin() + j + 1, disk[i]);
+                disk.erase(disk.begin() + i + 1);
+                ++i;
+                break;
+            }
+            ++j;
         }
-		//calculate_checksum(defrag_disk);
+        // calculate_checksum(defrag_disk);
     }
     for (auto p : disk)
     {
@@ -125,11 +125,11 @@ std::vector<int> defrag_whole(std::vector<DiskPartition> disk)
         {
             defrag_disk.push_back(p.index);
         }
-		int free = p.free;
-		while (free--)
-		{
-			defrag_disk.push_back(0);
-		}
+        int free = p.free;
+        while (free--)
+        {
+            defrag_disk.push_back(0);
+        }
     }
 
     return defrag_disk;
@@ -137,41 +137,41 @@ std::vector<int> defrag_whole(std::vector<DiskPartition> disk)
 
 int main(int argc, char* argv[])
 {
-	std::print("Day 9 Solution\n");
+    std::print("Day 9 Solution\n");
 
-	std::string filename;
+    std::string filename;
 
-	if (argc < 2)
-	{
-		filename = "input.txt";
-	}
-	else
-	{
-		filename = argv[1];
-	}
-	
-	std::ifstream inputFile(filename);
+    if (argc < 2)
+    {
+        filename = "input.txt";
+    }
+    else
+    {
+        filename = argv[1];
+    }
 
-	if (!inputFile.is_open())
-	{
-		std::print("Couldn't open {}\n", filename);
-		return -1;
-	}
+    std::ifstream inputFile(filename);
 
-	std::string line;
+    if (!inputFile.is_open())
+    {
+        std::print("Couldn't open {}\n", filename);
+        return -1;
+    }
 
-	while (std::getline(inputFile, line))
-	{
-	    auto disk = parseDisk(line);
+    std::string line;
 
-		auto defrag_disk = defrag(disk);
+    while (std::getline(inputFile, line))
+    {
+        auto disk = parseDisk(line);
 
-		auto checksum = calculate_checksum(defrag_disk);
-		auto checksum_whole = calculate_checksum(defrag_whole(disk));
+        auto defrag_disk = defrag(disk);
 
-		std::print("cs {}\n", checksum);
-		std::print("whole cs {}\n", checksum_whole);
-	}
-	
+        auto checksum       = calculate_checksum(defrag_disk);
+        auto checksum_whole = calculate_checksum(defrag_whole(disk));
+
+        std::print("cs {}\n", checksum);
+        std::print("whole cs {}\n", checksum_whole);
+    }
+
     return 0;
 }
