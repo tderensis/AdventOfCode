@@ -123,8 +123,6 @@ StoneCount count_stones(Stones& stones)
 
 int main(int argc, char* argv[])
 {
-    std::print("Day 11 Solution\n");
-
     std::string   filename = argc < 2 ? "input.txt" : argv[1];
     std::ifstream inputFile(filename);
 
@@ -146,9 +144,8 @@ int main(int argc, char* argv[])
         stone_count[i] = count_stones(stones);
     }
 
-    for (auto blinks : {num_blinks_p1, num_blinks_p2})
-    {
-        std::print("blinks {}: num stones {}\n", blinks, stone_count[blinks - 1]);
-    }
+    std::print("Part 1: {}\n", stone_count[num_blinks_p1 - 1]);
+    std::print("Part 2: {}\n", stone_count[num_blinks_p2 - 1]);
+
     return 0;
 }
