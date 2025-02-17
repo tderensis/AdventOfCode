@@ -151,8 +151,6 @@ int variance(Robots& robots)
 
 int main(int argc, char* argv[])
 {
-    std::print("Day 14 Solution\n");
-
     std::string   filename = argc < 2 ? "input.txt" : argv[1];
     std::ifstream inputFile(filename);
 
@@ -187,7 +185,7 @@ int main(int argc, char* argv[])
         move_robots(robots, width, height);
         if (i == 99)
         {
-            std::print("safety factor at 100s {}\n", safety_factor(robots, width, height));
+            std::print("Part 1: {}\n", safety_factor(robots, width, height));
         }
 
         // print_robots(robots);
@@ -202,6 +200,6 @@ int main(int argc, char* argv[])
         }
     }
 
-    std::print("lowest variance time: {}\n", lowest_variance_time);
+    std::print("Part 2: {}\n", lowest_variance_time);
     return 0;
 }
