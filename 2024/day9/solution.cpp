@@ -1,10 +1,8 @@
 #include <print>
 #include <fstream>
-#include <sstream>
 #include <string>
 #include <vector>
-#include <stdio.h>
-#include <string_view>
+
 struct DiskPartition
 {
     int index;
@@ -12,41 +10,46 @@ struct DiskPartition
     int free;
 };
 
-std::vector<DiskPartition> parseDisk(std::string s)
-{
-    std::vector<DiskPartition> disk;
+using Disk = std::vector<DiskPartition>;
 
-    bool          parsingUsedSize = true;
-    DiskPartition partition       = {};
-    for (char c : s)
+std::vector<Disk> parse_input(std::ifstream& input)
+{
+    std::vector<Disk> disks;
+
+    for (std::string line; std::getline(input, line);)
     {
-        if (parsingUsedSize)
+        bool          parsingUsedSize = true;
+        Disk          disk;
+        DiskPartition partition = {};
+        for (char c : line)
         {
-            partition.used = c - '0';
+            if (parsingUsedSize)
+            {
+                partition.used = c - '0';
+            }
+            else
+            {
+                partition.free = c - '0';
+                disk.push_back(partition);
+                partition.index++;
+            }
+            parsingUsedSize = !parsingUsedSize;
         }
-        else
-        {
-            partition.free = c - '0';
-            disk.push_back(partition);
-            partition.index++;
-        }
-        parsingUsedSize = !parsingUsedSize;
+        partition.free = 0;
+        disk.push_back(partition);
+        disks.push_back(disk);
     }
 
-    partition.free = 0;
-    disk.push_back(partition);
-
-    return disk;
+    return disks;
 }
 
-std::vector<int> defrag(std::vector<DiskPartition> disk)
+std::vector<int> defrag(Disk disk)
 {
     std::vector<int> defrag_disk;
     bool             done = false;
-    for (int i = 0; i < disk.size() - 1; ++i)
+    for (size_t i = 0; i < disk.size() - 1; ++i)
     {
         int used = disk[i].used;
-        int free = disk[i].free;
         while (used--)
         {
             defrag_disk.push_back(i);
@@ -87,7 +90,7 @@ std::vector<int> defrag(std::vector<DiskPartition> disk)
 int64_t calculate_checksum(std::vector<int> defrag_disk)
 {
     int64_t checksum = 0;
-    for (int i = 0; i < defrag_disk.size(); ++i)
+    for (size_t i = 0; i < defrag_disk.size(); ++i)
     {
         checksum += i * defrag_disk[i];
     }
@@ -98,10 +101,10 @@ int64_t calculate_checksum(std::vector<int> defrag_disk)
 std::vector<int> defrag_whole(std::vector<DiskPartition> disk)
 {
     std::vector<int> defrag_disk = {};
-    bool             done        = false;
-    for (int i = disk.size() - 1; i >= 0; --i)
+
+    for (int i = (int)disk.size() - 1; i >= 0; --i)
     {
-        int j = 0;
+        size_t j = 0;
         while (disk[j].index != disk[i].index)
         {
             if (disk[i].used <= disk[j].free)
@@ -116,8 +119,8 @@ std::vector<int> defrag_whole(std::vector<DiskPartition> disk)
             }
             ++j;
         }
-        // calculate_checksum(defrag_disk);
     }
+
     for (auto p : disk)
     {
         int used = p.used;
@@ -137,19 +140,7 @@ std::vector<int> defrag_whole(std::vector<DiskPartition> disk)
 
 int main(int argc, char* argv[])
 {
-    std::print("Day 9 Solution\n");
-
-    std::string filename;
-
-    if (argc < 2)
-    {
-        filename = "input.txt";
-    }
-    else
-    {
-        filename = argv[1];
-    }
-
+    std::string   filename = argc < 2 ? "input.txt" : argv[1];
     std::ifstream inputFile(filename);
 
     if (!inputFile.is_open())
@@ -158,19 +149,17 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    std::string line;
+    auto disks = parse_input(inputFile);
 
-    while (std::getline(inputFile, line))
+    for (auto& disk : disks)
     {
-        auto disk = parseDisk(line);
-
         auto defrag_disk = defrag(disk);
 
         auto checksum       = calculate_checksum(defrag_disk);
         auto checksum_whole = calculate_checksum(defrag_whole(disk));
 
-        std::print("cs {}\n", checksum);
-        std::print("whole cs {}\n", checksum_whole);
+        std::print("Part 1: {}\n", checksum);
+        std::print("Part 2: {}\n", checksum_whole);
     }
 
     return 0;
