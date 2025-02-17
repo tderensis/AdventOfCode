@@ -1,72 +1,88 @@
 #include <print>
 #include <fstream>
-#include <sstream>
+#include <istream>
 #include <string>
 #include <vector>
-#include <stdio.h>
-#include <string_view>
 
-int search2D(std::vector<std::vector<char>> grid, int row, int col, std::string word)
+std::vector<std::vector<char>> parse_input(std::istream& input)
 {
-    int m     = grid.size();
-    int n     = grid[0].size();
-    int count = 0;
+    std::vector<std::vector<char>> ws;
 
-    // return false if the given coordinate
-    // does not match with first index char.
-    if (grid[row][col] != word[0])
-        return 0;
-
-    int len = word.size();
-
-    // x and y are used to set the direction in which
-    // word needs to be searched.
-    std::vector<int> x = {-1, -1, -1, 0, 0, 1, 1, 1};
-    std::vector<int> y = {-1, 0, 1, -1, 1, -1, 0, 1};
-
-    // This loop will search in all the 8 directions
-    // one by one. It will return true if one of the
-    // directions contain the word.
-    for (int dir = 0; dir < 8; dir++)
+    for (std::string line; std::getline(input, line);)
     {
-
-        // Initialize starting point for current direction
-        int k, currX = row + x[dir], currY = col + y[dir];
-
-        // First character is already checked, match remaining
-        // characters
-        for (k = 1; k < len; k++)
+        std::vector<char> row;
+        for (char c : line)
         {
+            row.push_back(c);
+        }
+        ws.push_back(row);
+    }
+    return ws;
+}
 
-            // break if out of bounds
-            if (currX >= m || currX < 0 || currY >= n || currY < 0)
-                break;
+bool search_in_direction(
+    const std::vector<std::vector<char>>& grid, size_t row, size_t col, std::string word, int x_dir,
+    int y_dir)
+{
+    size_t x = row;
+    size_t y = col;
 
-            if (grid[currX][currY] != word[k])
-                break;
+    size_t m = grid.size();
+    size_t n = grid[0].size();
 
-            //  Moving in particular direction
-            currX += x[dir], currY += y[dir];
+    for (size_t k = 0; k < word.size(); k++)
+    {
+        if (x >= m || y >= n)
+        {
+            return false;
         }
 
-        // If all character matched, then value of must
-        // be equal to length of word
-        if (k == len)
+        if (grid[x][y] != word[k])
+        {
+            return false;
+        }
+
+        x += x_dir;
+        y += y_dir;
+    }
+
+    return true;
+}
+
+unsigned search_2d(
+    const std::vector<std::vector<char>>& grid, size_t row, size_t col, std::string word)
+{
+    if (grid[row][col] != word[0])
+    {
+        return 0;
+    }
+
+    unsigned count = 0;
+
+    int x[] = {-1, -1, -1, 0, 0, 1, 1, 1};
+    int y[] = {-1, 0, 1, -1, 1, -1, 0, 1};
+
+    for (size_t dir = 0; dir < std::size(x); dir++)
+    {
+        if (search_in_direction(grid, row, col, word, x[dir], y[dir]))
+        {
             ++count;
+        }
     }
 
     return count;
 }
 
-int countXMAS(std::vector<std::vector<char>> grid)
+unsigned count_xmas(const std::vector<std::vector<char>>& grid)
 {
-    int m     = grid.size();
-    int n     = grid[0].size();
-    int count = 0;
+    size_t m = grid.size();
+    size_t n = grid[0].size();
 
-    for (std::size_t i = 1; i < m - 1; ++i)
+    unsigned count = 0;
+
+    for (size_t i = 1; i < m - 1; ++i)
     {
-        for (std::size_t j = 1; j < n - 1; ++j)
+        for (size_t j = 1; j < n - 1; ++j)
         {
             if (grid[i][j] == 'A')
             {
@@ -88,18 +104,18 @@ int countXMAS(std::vector<std::vector<char>> grid)
 }
 
 // This function calls search2D for each coordinate
-int searchWord(std::vector<std::vector<char>> grid, std::string word)
+unsigned search_word(const std::vector<std::vector<char>>& grid, std::string word)
 {
-    int m = grid.size();
-    int n = grid[0].size();
+    size_t m = grid.size();
+    size_t n = grid[0].size();
 
-    int count = 0;
+    unsigned count = 0;
 
-    for (std::size_t i = 0; i < m; ++i)
+    for (size_t i = 0; i < m; ++i)
     {
-        for (std::size_t j = 0; j < n; ++j)
+        for (size_t j = 0; j < n; ++j)
         {
-            count += search2D(grid, i, j, word);
+            count += search_2d(grid, i, j, word);
         }
     }
     return count;
@@ -107,19 +123,7 @@ int searchWord(std::vector<std::vector<char>> grid, std::string word)
 
 int main(int argc, char* argv[])
 {
-    std::print("Day4 Solution\n");
-
-    std::string filename;
-
-    if (argc < 2)
-    {
-        filename = "input.txt";
-    }
-    else
-    {
-        filename = argv[1];
-    }
-
+    std::string   filename = argc < 2 ? "input.txt" : argv[1];
     std::ifstream inputFile(filename);
 
     if (!inputFile.is_open())
@@ -128,34 +132,10 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    // Read the wordsearch into a vector
-    std::vector<std::vector<char>> ws;
-    std::string                    line;
+    auto ws = parse_input(inputFile);
 
-    while (std::getline(inputFile, line))
-    {
-        std::vector<char> row;
-        for (char c : line)
-        {
-            row.push_back(c);
-        }
-        ws.push_back(row);
-    }
+    std::print("Part 1: {}\n", search_word(ws, "XMAS"));
+    std::print("Part 2: {}\n", count_xmas(ws));
 
-    // do the search
-    int count = 0;
-
-    std::vector<std::string> words = {
-        "XMAS",
-    };
-
-    for (auto word : words)
-    {
-        count += searchWord(ws, word);
-    }
-
-    std::print("word count {}\n", count);
-
-    std::print("x-mas count {}\n", countXMAS(ws));
     return 0;
 }
