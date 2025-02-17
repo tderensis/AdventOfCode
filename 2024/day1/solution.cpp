@@ -12,9 +12,7 @@ std::tuple<std::vector<int>, std::vector<int>> parse_input(std::istream& input)
     std::vector<int> list1;
     std::vector<int> list2;
 
-    std::string line;
-
-    while (std::getline(input, line))
+    for (std::string line; std::getline(input, line);)
     {
         int n1        = 0;
         int n2        = 0;

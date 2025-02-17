@@ -11,9 +11,8 @@ using Level = std::vector<int>;
 std::vector<Level> parse_input(std::istream& input)
 {
     std::vector<Level> levels;
-    std::string        line;
 
-    while (std::getline(input, line))
+    for (std::string line; std::getline(input, line);)
     {
         std::stringstream stream(line);
 
