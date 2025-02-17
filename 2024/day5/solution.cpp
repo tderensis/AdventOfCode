@@ -1,10 +1,10 @@
 #include <print>
 #include <fstream>
-#include <sstream>
+#include <istream>
 #include <string>
 #include <vector>
-#include <stdio.h>
-#include <string_view>
+#include <cstdio>
+#include <tuple>
 
 struct Rule
 {
@@ -12,34 +12,15 @@ struct Rule
     int last;
 };
 
-int main(int argc, char* argv[])
+using Numbers = std::vector<int>;
+using Rules  = std::vector<Rule>;
+
+std::tuple<Rules, std::vector<Numbers>> parse_input(std::istream& input)
 {
-    std::print("Day5 Solution\n");
+    Rules  rules;
+    std::vector<Numbers> numberList;
 
-    std::string filename;
-
-    if (argc < 2)
-    {
-        filename = "input.txt";
-    }
-    else
-    {
-        filename = argv[1];
-    }
-
-    std::ifstream inputFile(filename);
-
-    if (!inputFile.is_open())
-    {
-        std::print("Couldn't open {}\n", filename);
-        return -1;
-    }
-
-    // Read the wordsearch into a vector
-    std::vector<Rule> rules;
-    std::string       line;
-
-    while (std::getline(inputFile, line) && line.length() != 0)
+    for (std::string line; std::getline(input, line) && line.length() != 0;)
     {
         Rule rule;
         int  numValues = sscanf(line.data(), "%d|%d", &rule.first, &rule.last);
@@ -49,12 +30,9 @@ int main(int argc, char* argv[])
         }
     }
 
-    int midCount      = 0;
-    int fixedMidCount = 0;
-
-    while (std::getline(inputFile, line))
+    for (std::string line; std::getline(input, line);)
     {
-        std::vector<int> numbers;
+        Numbers numbers;
         int              number = 0;
         for (char c : line)
         {
@@ -71,7 +49,29 @@ int main(int argc, char* argv[])
         }
         // store the last number
         numbers.push_back(number);
+        numberList.push_back(numbers);
+    }
+    return {rules, numberList};
+}
 
+int main(int argc, char* argv[])
+{
+    std::string   filename = argc < 2 ? "input.txt" : argv[1];
+    std::ifstream inputFile(filename);
+
+    if (!inputFile.is_open())
+    {
+        std::print("Couldn't open {}\n", filename);
+        return -1;
+    }
+
+    auto [rules, numberList] = parse_input(inputFile);
+
+    int midCount      = 0;
+    int fixedMidCount = 0;
+
+    for (auto& numbers : numberList)
+    {
         bool good              = false;
         bool fixed             = false;
         bool fixedARule        = false;
@@ -129,7 +129,8 @@ int main(int argc, char* argv[])
         }
     }
 
-    std::print("midCount {}\n", midCount);
-    std::print("fixed midCount {}\n", fixedMidCount);
+    std::print("Part 1: {}\n", midCount);
+    std::print("Part 2: {}\n", fixedMidCount);
+    
     return 0;
 }
